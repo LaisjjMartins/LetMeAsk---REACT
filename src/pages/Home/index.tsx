@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { FormEvent, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import { Button } from "../../components/Button";
@@ -8,10 +8,12 @@ import LogoImg from "../../assets/images/logo.svg";
 import GoogleImg from "../../assets/images/google-icon.svg";
 
 import "../../styles/auth.scss";
+import { database } from "../../services/firebase";
 
 
 export function Home() {
     const { signInWithGoogle, user } = useContext(AuthContext);
+    const [roomCode, setRoomCode] = useState('');
     const navigate = useNavigate();
 
     async function handlecreateRoom() {
@@ -19,6 +21,21 @@ export function Home() {
             await signInWithGoogle()
         }
         navigate('/rooms/new');
+    }
+
+
+    async function handleJoinRoom(event: FormEvent){
+        event.preventDefault();
+        if(roomCode.trim() === ''){
+            return;
+        }
+        const roomRef = await database.ref(`/rooms/${roomCode}`).get();
+
+        if(!roomRef.exists()){  //! => sinal de negação, ou seja, se retornar falso
+            alert("Sala não existe!")
+            return;
+        }
+        navigate(`/rooms/${roomCode}`);
     }
 
     return (
@@ -36,11 +53,13 @@ export function Home() {
                         Crie sua sala com o Google
                     </button>
                     <div className="separator"> ou entre em uma sala</div>
-                    <form>
+                    <form onSubmit={handleJoinRoom}>
                         <input
                             type="text"
-                            placeholder="Digite o código da sala" />
-                        <Button>
+                            placeholder="Digite o código da sala"
+                            value={roomCode}
+                            onChange={event => setRoomCode(event.target.value)} />
+                        <Button >
                             Entrar na sala
                         </Button>
                     </form>

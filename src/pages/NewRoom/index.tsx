@@ -1,5 +1,5 @@
 import React, { useContext, FormEvent, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import { Button } from "../../components/Button";
 
@@ -10,6 +10,7 @@ import "../../styles/auth.scss";
 import { database } from "../../services/firebase";
 
 export function NewRoom() {
+    const navigate = useNavigate();
     const { user } = useContext(AuthContext);
     const [newRoom, setNewRoom] = useState('');
 
@@ -24,6 +25,7 @@ export function NewRoom() {
             title: newRoom,
             authorId: user?.id,
         }) //jogando a informação para lá dentro
+        navigate(`/rooms/${firebaseRoom.key}`) //id inserido da sala
         console.log(roomRef)
     }
     return (
